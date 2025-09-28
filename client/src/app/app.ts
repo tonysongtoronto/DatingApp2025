@@ -3,10 +3,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { lastValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
+import { Nav } from "../layout/nav/nav";
+import { Home } from "../features/home/home";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Nav, Home],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
