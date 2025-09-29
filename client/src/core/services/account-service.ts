@@ -9,11 +9,10 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class AccountService {
+  
   private http = inject(HttpClient);
   currentUser = signal<User | null>(null);
-
   baseUrl = environment.apiUrl+'/';
-
   register(creds: RegisterCreds) {
     return this.http.post<User>(this.baseUrl + 'account/register', creds).pipe(
       tap(user => {
