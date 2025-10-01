@@ -8,15 +8,24 @@ using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
-public class AccountController(AppDbContext context, ITokenService tokenService) : BaseApiController
+public class AccountController(
+    AppDbContext context,
+    ITokenService tokenService,
+    ILogger<AccountController> logger   // ✅ 注入 Logger
+) : BaseApiController
 {
     [HttpPost("register")] // api/account/register
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
-        if (await EmailExists(registerDto.Email)) return BadRequest("Email taken");
+        if (await EmailExists(registerDto.Email))
+        {
+            logger.LogWarning("Registration attempt with existing email: {Email}", registerDto.Email);
+            return BadRequest("Email taken");
+        }
 
         using var hmac = new HMACSHA512();
 
@@ -31,24 +40,37 @@ public class AccountController(AppDbContext context, ITokenService tokenService)
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
+        logger.LogInformation("New user registered: {Email}", user.Email);
+
         return user.ToDto(tokenService);
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
+        logger.LogInformation("Login attempt for email: {Email}", loginDto.Email);
+
         var user = await context.Users.SingleOrDefaultAsync(x => x.Email == loginDto.Email);
 
-        if (user == null) return Unauthorized("Invalid email address");
+        if (user == null)
+        {
+            logger.LogWarning("Login failed. Email not found: {Email}", loginDto.Email);
+            return Unauthorized("Invalid email address");
+        }
 
         using var hmac = new HMACSHA512(user.PasswordSalt);
-
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
         for (var i = 0; i < computedHash.Length; i++)
         {
-            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+            if (computedHash[i] != user.PasswordHash[i])
+            {
+                logger.LogWarning("Login failed. Wrong password for email: {Email}", loginDto.Email);
+                return Unauthorized("Invalid password");
+            }
         }
+
+        logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
 
         return user.ToDto(tokenService);
     }
