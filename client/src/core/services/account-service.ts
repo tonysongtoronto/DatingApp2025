@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class AccountService {
-  
+
   private http = inject(HttpClient);
   currentUser = signal<User | null>(null);
   baseUrl = environment.apiUrl+'/';
@@ -17,6 +17,7 @@ export class AccountService {
     return this.http.post<User>(this.baseUrl + 'account/register', creds).pipe(
       tap(user => {
         if (user) {
+
           this.setCurrentUser(user)
         }
       })
@@ -27,6 +28,7 @@ export class AccountService {
     return this.http.post<User>(this.baseUrl + 'account/login', creds).pipe(
       tap(user => {
         if (user) {
+         
           this.setCurrentUser(user)
         }
       })
