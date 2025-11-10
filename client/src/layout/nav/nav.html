@@ -12,7 +12,7 @@
         </div>
 
         <nav class="flex gap-3 my-2 uppercase text-lg text-white">
-          
+
             @if (accountService.currentUser()) {
             <a routerLink="/members" routerLinkActive="text-accent" [routerLinkActiveOptions]="{exact: true}">Matches</a>
             <a routerLink="/lists" routerLinkActive="text-accent">Lists</a>
@@ -21,6 +21,12 @@
            <a routerLink="/errors" routerLinkActive="text-accent">Errors</a>
 
         </nav>
+   @if (busyService.busyRequestCount() > 0) {
+            <span class="loading loading-spinner text-accent"></span>
+        }
+
+
+
         <div class="flex align-middle ml-auto gap-3">
             @if (accountService.currentUser(); as user) {
             <div class="dropdown dropdown-end">
@@ -28,9 +34,13 @@
                     <img [src]="user?.imageUrl||'/user.png'" alt="user avatar" class="w-8 h-8 rounded-full">
                     <span>{{user.displayName}}</span>
                 </div>
+
+
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                    <li><a>Edit profile</a></li>
+                    <li><a routerLink="/members/{{user.id}}">Edit profile</a></li>
                     <li><a (click)="logout()">Logout</a></li>
+
+
                 </ul>
             </div>
             } @else {
