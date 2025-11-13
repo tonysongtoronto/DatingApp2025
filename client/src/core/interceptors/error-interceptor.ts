@@ -12,9 +12,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError(error => {
       if (error) {
         switch (error.status) {
+
+
           case 400:
+               const modelStateErrors = [];
             if (error.error.errors) {
-              const modelStateErrors = [];
+
               for (const key in error.error.errors) {
                 if (error.error.errors[key]) {
                   modelStateErrors.push(error.error.errors[key])
@@ -23,6 +26,17 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               throw modelStateErrors.flat();
             } else {
               toast.error(error.error)
+
+
+
+              if (typeof error.error === 'string') {
+            modelStateErrors.push(error.error);
+        } else if (typeof error.error === 'object') {
+
+            modelStateErrors.push(...Object.values(error.error).flat());
+        }
+
+          throw modelStateErrors.flat();
             }
             break;
           case 401:
