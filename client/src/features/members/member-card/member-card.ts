@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { Member } from '../../../types/member';
 import { RouterLink } from '@angular/router';
 import { AgePipe } from '../../../core/pipes/age-pipe';
@@ -17,6 +17,8 @@ export class MemberCard {
   member = input.required<Member>();
   protected hasLiked = computed(() => this.likeService.likeIds().includes(this.member().id));
 
+  closeModal = output();
+
     toggleLike(event: Event) {
     event.stopPropagation();
     this.likeService.toggleLike(this.member().id).subscribe({
@@ -26,8 +28,15 @@ export class MemberCard {
         } else {
           this.likeService.likeIds.update(ids => [...ids, this.member().id])
         }
+
+        this.close()
       }
     })
+  }
+
+ close() {
+
+    this.closeModal.emit();
   }
 
 

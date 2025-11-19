@@ -12,14 +12,18 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) =>
 
   const busyService = inject(BusyService);
 
+  const hasPredicate = req.params.keys().includes('predicate');
+
 const generateCacheKey = (url: string, params: HttpParams): string => {
     const paramString = params.keys().map(key => `${key}=${params.get(key)}`).join('&');
     return paramString ? `${url}?${paramString}` : url;
   }
 
+
+
   const cacheKey = generateCacheKey(req.url, req.params);
 
-  if (req.method === 'GET') {
+  if (req.method === 'GET'&& !hasPredicate) {
     const cachedResponse = cache.get(cacheKey);
     if (cachedResponse) {
       return of(cachedResponse);
