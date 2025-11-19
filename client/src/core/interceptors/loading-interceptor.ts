@@ -5,7 +5,11 @@ import { delay, finalize, of, tap } from 'rxjs';
 
 const cache = new Map<string, HttpEvent<unknown>>();
 
-export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
+export const loadingInterceptor: HttpInterceptorFn = (req, next) =>
+
+  {
+
+
   const busyService = inject(BusyService);
 
 const generateCacheKey = (url: string, params: HttpParams): string => {
