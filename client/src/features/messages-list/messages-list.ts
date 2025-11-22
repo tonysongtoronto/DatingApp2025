@@ -1,0 +1,85 @@
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { MessageService } from '../../core/services/message-service';
+import { PaginatedResult } from '../../types/pagination';
+import { Message } from '../../types/message';
+import { Paginator } from "../../shared/paginator/paginator";
+import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
+
+@Component({
+  selector: 'app-messages-list',
+  imports: [Paginator, RouterLink, DatePipe],
+  templateUrl: './messages-list.html',
+  styleUrl: './messages-list.css'
+})
+export class MessagesList implements OnInit {
+
+  private messageService = inject(MessageService);
+  protected container = 'Inbox';
+  protected fetchedContainer = 'Inbox';
+  protected pageNumber = 1;
+  protected pageSize = 10;
+  protected paginatedMessages = signal<PaginatedResult<Message> | null>(null);
+
+  tabs = [
+    { label: 'Inbox', value: 'Inbox' },
+    { label: 'Outbox', value: 'Outbox' },
+  ]
+
+  ngOnInit(): void {
+    this.loadMessages();
+  }
+
+  loadMessages() {
+    this.messageService.getMessages(this.container, this.pageNumber, this.pageSize).subscribe({
+      next: response => {
+        this.paginatedMessages.set(response);
+        this.fetchedContainer = this.container;
+      }
+    })
+  }
+
+deleteMessage(event: Event, id: string) {
+  event.stopPropagation();
+  this.messageService.deleteMessage(id).subscribe({
+    next: () => {
+      const current = this.paginatedMessages();
+      if (current?.items) {
+        this.paginatedMessages.update(prev => {
+          if (!prev) return null;
+
+          const newItems = prev.items.filter(x => x.id !== id) || [];
+
+          return {
+            items: newItems,
+            metadata: prev.metadata
+          }
+        })
+      }
+    },
+    error: (error) => {
+      console.error('删除消息失败:', error);
+      // 可以添加用户友好的错误提示
+      // 例如使用 Angular Material 的 Snackbar 或其他通知组件
+      // this.snackBar.open('删除消息失败，请稍后重试', '关闭', { duration: 3000 });
+    }
+  })
+}
+
+  get isInbox() {
+    return this.fetchedContainer === 'Inbox';
+  }
+
+  setContainer(container: string) {
+    this.container = container;
+    this.pageNumber = 1;
+    this.loadMessages();
+  }
+
+  onPageChange(event: { pageNumber: number, pageSize: number }) {
+    this.pageSize = event.pageSize;
+    this.pageNumber = event.pageNumber;
+    this.loadMessages();
+  }
+
+}

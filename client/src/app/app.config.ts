@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([errorInterceptor,jwtInterceptor,loadingInterceptor])),
+    provideHttpClient(withInterceptors([errorInterceptor,jwtInterceptor])),
     provideAppInitializer(
       async () => {
       const initService = inject(InitService);

@@ -26,14 +26,6 @@ export class MemberPhotos {
   protected photos = signal<Photo[]>([]);
   protected accountService = inject(AccountService);
 
-  //   ngOnInit(): void {
-  //   const memberId = this.route.parent?.snapshot.paramMap.get('id');
-  //   if (memberId) {
-  //     this.memberService.getMemberPhotos(memberId).subscribe({
-  //       next: photos => this.photos.set(photos)
-  //     })
-  //   }
-  // }
 
   ngOnInit(): void {
   this.route.parent?.paramMap
